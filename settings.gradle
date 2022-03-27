@@ -1,0 +1,5 @@
+rootProject.name = 'eventbus'
+include 'eventbus-annotations'
+include 'eventbus-app'
+include 'eventbus-annotation-processor'
+
