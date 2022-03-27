@@ -1,10 +1,9 @@
 package com.richard.event.saga;
 
-import com.richard.event.ProductCategoryCreatedEvent;
-import com.richard.event.ProductCreatedEvent;
 import com.richard.eventbus.annotation.Saga;
 import com.richard.eventbus.annotation.StartSaga;
-import com.richard.eventbus.annotation.Subscribe;
+import com.richard.product.events.ProductCategoryCreatedEvent;
+import com.richard.product.events.ProductCreatedEvent;
 
 @Saga
 public class ProductSaga {
@@ -14,7 +13,6 @@ public class ProductSaga {
 
     }
 
-    @Subscribe
     void on(ProductCategoryCreatedEvent event) {
 
     }

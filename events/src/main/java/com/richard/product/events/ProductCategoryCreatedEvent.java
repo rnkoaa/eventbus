@@ -1,4 +1,4 @@
-package com.richard.event;
+package com.richard.product.events;
 
 import java.util.UUID;
 

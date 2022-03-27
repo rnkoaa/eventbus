@@ -1,0 +1,4 @@
+com.richard.product.events.ProductCategoryCreatedEvent
+com.richard.product.events.ProductCreatedEvent,com.richard.product.events.listener.ProductCreatedEventListener,on
+com.richard.product.events.ProductCreatedEvent,com.richard.product.events.listener.ProductCreatedEventLoggerListener,on
+com.richard.product.events.ProductUpdatedEvent,com.richard.product.events.listener.ProductUpdatedEventListener,on

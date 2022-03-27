@@ -11,6 +11,8 @@
             <option value="$PROJECT_DIR$/eventbus-annotation-processor" />
             <option value="$PROJECT_DIR$/eventbus-annotations" />
             <option value="$PROJECT_DIR$/eventbus-app" />
+            <option value="$PROJECT_DIR$/eventbus-framework" />
+            <option value="$PROJECT_DIR$/events" />
           </set>
         </option>
       </GradleProjectSettings>
