@@ -1,4 +1,4 @@
-Event Bus Annotation Processing.
+# Event Bus Annotation Processing.
 
 1. There can be multiple listeners for one event
 2. for the event subscriber, the event must be the first object of the method
