@@ -37,6 +37,13 @@ java {
     targetCompatibility = JavaVersion.toVersion("17")
 }
 
+tasks.withType(JavaCompile) {
+    options.compilerArgs = [
+            '-Aevent.bus.index=event-bus/com.richard.eventbus.EventIndexFile'
+//            '-Amicronaut.processing.annotations=com.excalibur.*',
+    ]
+}
+
 graalvmNative.toolchainDetection = false
 micronaut {
 //    runtime("netty")
