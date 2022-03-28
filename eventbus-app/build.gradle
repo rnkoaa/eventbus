@@ -14,6 +14,7 @@ repositories {
 dependencies {
     annotationProcessor(project(":eventbus-annotation-processor"))
     implementation(project(":eventbus-annotation-processor"))
+
     implementation(project(":eventbus-annotations"))
     implementation(project(":eventbus-framework"))
     implementation(project(":events"))

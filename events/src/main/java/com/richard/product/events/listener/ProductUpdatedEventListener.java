@@ -8,7 +8,7 @@ import jakarta.inject.Singleton;
 public class ProductUpdatedEventListener {
 
     @EventListener
-    void on(ProductUpdatedEvent event) {
+    public void on(ProductUpdatedEvent event) {
         System.out.println("Got event " + event);
     }
 }

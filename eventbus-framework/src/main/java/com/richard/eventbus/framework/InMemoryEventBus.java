@@ -77,7 +77,6 @@ public class InMemoryEventBus implements EventBus {
                     e);
             }
         }
-
     }
 
     @Override
