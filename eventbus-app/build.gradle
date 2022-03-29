@@ -12,11 +12,12 @@ repositories {
 }
 
 dependencies {
+    implementation(project(":eventbus-annotations"))
+    implementation(project(":eventbus-framework"))
+
     annotationProcessor(project(":eventbus-annotation-processor"))
     implementation(project(":eventbus-annotation-processor"))
 
-    implementation(project(":eventbus-annotations"))
-    implementation(project(":eventbus-framework"))
     implementation(project(":events"))
     annotationProcessor("io.micronaut:micronaut-http-validation")
     implementation("io.micronaut:micronaut-http-client")
@@ -35,13 +36,6 @@ application {
 java {
     sourceCompatibility = JavaVersion.toVersion("17")
     targetCompatibility = JavaVersion.toVersion("17")
-}
-
-tasks.withType(JavaCompile) {
-    options.compilerArgs = [
-            '-Aevent.bus.index=event-bus/com.richard.eventbus.EventIndexFile'
-//            '-Amicronaut.processing.annotations=com.excalibur.*',
-    ]
 }
 
 graalvmNative.toolchainDetection = false

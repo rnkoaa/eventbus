@@ -37,6 +37,7 @@ public class EventListenerProcessor extends AbstractAnnotationProcessor {
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         String indexFilePath = processingEnv.getOptions().get(OPTION_EVENT_BUS_INDEX);
+        note(indexFilePath);
         if (indexFilePath == null || indexFilePath.isEmpty()) {
             error("No option '" + OPTION_EVENT_BUS_INDEX + "' passed to annotation processor");
             return false;
@@ -84,15 +85,15 @@ public class EventListenerProcessor extends AbstractAnnotationProcessor {
                     }
                 });
 
-//        if (roundEnv.processingOver()) {
-        note("found %d classes to write", eventListenerGroupedClasses.size());
-        try {
-            eventListenerGroupedClasses.writeIndexFile(indexFilePath, messager, filer);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        if (roundEnv.processingOver()) {
+            note("found %d classes to write", eventListenerGroupedClasses.size());
+            try {
+                eventListenerGroupedClasses.writeIndexFile(indexFilePath, messager, filer);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            eventListenerGroupedClasses.clear();
         }
-        eventListenerGroupedClasses.clear();
-//        }
         return true;
     }
 
