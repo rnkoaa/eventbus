@@ -39,23 +39,14 @@ public class Application implements ApplicationEventListener<StartupEvent> {
                 .map(entry -> {
                     Object bean = applicationContext.getBean(entry.eventListenerClass());
                      return entry.withEventListenerInstance(bean);
-
                 })
-                .forEach(entry -> {
-                   eventBusIndex.put(entry);
-                });
-//        EventBus eventBus = InMemoryEventBus.getInstance();
-//        EventBusRegistrar eventBusRegistrar = new EventBusRegistrar(eventBus);
-//        var eventListeners = eventBusRegistrar.loadEventListeners();
-//        eventListeners.stream()
-//            .map(eventHandlerClassInfo -> {
-//                Object bean = applicationContext.getBean(eventHandlerClassInfo.eventListenerClass());
-//                return eventHandlerClassInfo.withEventListenerInstance(bean);
-//            })
-//            .forEach(eventBusRegistrar::register);
-//
-//        System.out.println("Known Events: " + eventBus.getSubscribers().size());
-//        eventBus.publish(new ProductCreatedEvent(UUID.randomUUID(), "Product 1", "Sku"));
+                .forEach(eventBusIndex::put);
+
+        EventBusRegistrar eventBusRegistrar = new EventBusRegistrar(eventBusIndex);
+        EventBus eventBus = eventBusRegistrar.build();
+
+        System.out.println("Known Events: " + eventBus.getSubscribers().size());
+        eventBus.publish(new ProductCreatedEvent(UUID.randomUUID(), "Product 1", "Sku"));
 
 //        try {
 //            ProductCreatedEventListener productCreatedEventListener = applicationContext.getBean(ProductCreatedEventListener.class);
