@@ -46,7 +46,7 @@ public class Application implements ApplicationEventListener<StartupEvent> {
         EventBus eventBus = eventBusRegistrar.build();
 
         System.out.println("Known Events: " + eventBus.getSubscribers().size());
-        eventBus.publish(new ProductCreatedEvent(UUID.randomUUID(), "Product 1", "Sku"));
+//        eventBus.publish(new ProductCreatedEvent(UUID.randomUUID(), "Product 1", "Sku"));
 
 //        try {
 //            ProductCreatedEventListener productCreatedEventListener = applicationContext.getBean(ProductCreatedEventListener.class);

@@ -104,6 +104,7 @@
         <outputRelativeToContentRoot value="true" />
         <option name="event.bus.index" value="event-bus/com.richard.eventbus.EventIndexFile" />
         <processorPath useClasspath="false">
+          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.immutables/value/2.9.0/36d6ea4ee2bd9eff08d201f4db1d18e1bbef221e/value-2.9.0.jar" />
           <entry name="$PROJECT_DIR$/eventbus-annotation-processor/build/libs/eventbus-annotation-processor-1.0-SNAPSHOT.jar" />
           <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/io.micronaut/micronaut-inject-java/3.4.0/2f8401da548e73f65d1b8929a2891659d28a0b/micronaut-inject-java-3.4.0.jar" />
           <entry name="$PROJECT_DIR$/eventbus-framework/build/libs/eventbus-framework-1.0-SNAPSHOT.jar" />
