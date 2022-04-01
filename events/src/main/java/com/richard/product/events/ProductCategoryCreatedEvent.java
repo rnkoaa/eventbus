@@ -1,11 +1,25 @@
 package com.richard.product.events;
 
+import com.richard.eventbus.annotation.AggregateEvent;
+import com.richard.product.events.ProductCategoryCreatedEventImpl.Builder;
+import org.immutables.value.Value;
+
 import java.util.UUID;
 
-public record ProductCategoryCreatedEvent(
-    UUID productId,
-    UUID categoryId,
-    String categoryName
-) {
+@Value.Immutable
+@AggregateEvent
+@ApiStyle
+//@JsonDeserialize(builder = ProductCategoryCreatedEvent.Builder.class)
+public interface ProductCategoryCreatedEvent extends VersionedEvent {
+
+    UUID getProductId();
+
+    UUID getCategoryId();
+
+    String getName();
+
+    static Builder newBuilder() {
+        return ProductCategoryCreatedEventImpl.builder();
+    }
 
 }
