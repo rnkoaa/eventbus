@@ -3,18 +3,14 @@ package com.richard.eventbus;
 import com.richard.eventbus.framework.EventBus;
 import com.richard.eventbus.framework.EventBusIndex;
 import com.richard.eventbus.framework.EventBusRegistrar;
-import com.richard.eventbus.framework.EventHandlerClassInfo;
-import com.richard.eventbus.framework.InMemoryEventBus;
+import com.richard.product.events.Product;
 import com.richard.product.events.ProductCreatedEvent;
-import com.richard.product.events.listener.ProductCreatedEventListener;
+import com.richard.product.events.ProductDeactivatedEvent;
 import io.micronaut.context.ApplicationContext;
 import io.micronaut.context.event.ApplicationEventListener;
 import io.micronaut.context.event.StartupEvent;
 import io.micronaut.runtime.Micronaut;
 import jakarta.inject.Singleton;
-
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.UUID;
 
 @Singleton
@@ -34,27 +30,33 @@ public class Application implements ApplicationEventListener<StartupEvent> {
     public void onApplicationEvent(StartupEvent event) {
         EventBusIndex eventBusIndex = new EventBusIndexImpl();
         eventBusIndex.getEventHandlers()
-                .values()
-                .stream()
-                .map(entry -> {
-                    Object bean = applicationContext.getBean(entry.eventListenerClass());
-                     return entry.withEventListenerInstance(bean);
-                })
-                .forEach(eventBusIndex::put);
+            .values()
+            .stream()
+            .map(entry -> {
+                Object bean = applicationContext.getBean(entry.eventListenerClass());
+                return entry.withEventListenerInstance(bean);
+            })
+            .forEach(eventBusIndex::put);
 
         EventBusRegistrar eventBusRegistrar = new EventBusRegistrar(eventBusIndex);
         EventBus eventBus = eventBusRegistrar.build();
-
-        System.out.println("Known Events: " + eventBus.getSubscribers().size());
-//        eventBus.publish(new ProductCreatedEvent(UUID.randomUUID(), "Product 1", "Sku"));
-
-//        try {
-//            ProductCreatedEventListener productCreatedEventListener = applicationContext.getBean(ProductCreatedEventListener.class);
-//            Method on = ProductCreatedEventListener.class.getDeclaredMethod("on", ProductCreatedEvent.class);
-//            on.invoke(productCreatedEventListener, new ProductCreatedEvent(UUID.randomUUID(), "Product 1", "sku-1"));
+        eventBus.registerDeadLetterListener(object ->
+            System.out.println("Got a Dead letter event of type " + object.getClass() + ", Value: " + object)
+        );
 //
-//        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-//            throw new RuntimeException(e);
-//        }
+        eventBus.publish(ProductCreatedEvent.newBuilder()
+            .aggregateId(UUID.randomUUID())
+            .id(UUID.randomUUID())
+            .productId(UUID.randomUUID())
+            .aggregateName(Product.class.getSimpleName())
+            .name("Product 1")
+            .sku("Product 2")
+            .build());
+        eventBus.publish(ProductDeactivatedEvent.newBuilder()
+            .aggregateId(UUID.randomUUID())
+            .id(UUID.randomUUID())
+            .aggregateName(Product.class.getSimpleName())
+            .build());
+
     }
 }

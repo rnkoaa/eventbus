@@ -29,7 +29,7 @@ public record EventHandlerClassInfo(Class<?> eventClass,
 
     public EventHandlerClassInfo withHandlerMethod(Method handlerMethod) {
         if (eventListenerInstance == null) {
-            throw new IllegalArgumentException("cannot add a null class instance to handler Info");
+            throw new IllegalArgumentException("cannot add a null class instance to handler Info for event class" + eventClass);
         }
         return new EventHandlerClassInfo(
                 this.eventClass,

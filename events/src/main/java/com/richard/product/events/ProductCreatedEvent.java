@@ -1,6 +1,7 @@
 package com.richard.product.events;
 
 import com.richard.eventbus.annotation.AggregateEvent;
+import com.richard.product.events.ProductCreatedEventImpl.Builder;
 import org.immutables.value.Value;
 
 import java.util.UUID;
@@ -17,5 +18,9 @@ public  interface ProductCreatedEvent extends VersionedEvent {
 
     String getSku() ;
 
+
+    static Builder newBuilder(){
+        return ProductCreatedEventImpl.builder();
+    }
 }
 

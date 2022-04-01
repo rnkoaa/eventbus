@@ -7,6 +7,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import org.immutables.value.Value.Style.ImplementationVisibility;
 
 @Documented
 @Retention(RetentionPolicy.CLASS)
@@ -16,7 +17,7 @@ import java.lang.annotation.Target;
         forceJacksonPropertyNames = false,
         typeAbstract = "*",
         typeImmutable = "*Impl",
-        visibility = Value.Style.ImplementationVisibility.PACKAGE,
+        visibility = ImplementationVisibility.PUBLIC,
         overshadowImplementation = true
 )
 //@JsonSerialize

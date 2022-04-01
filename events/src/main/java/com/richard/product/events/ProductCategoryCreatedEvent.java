@@ -1,6 +1,7 @@
 package com.richard.product.events;
 
 import com.richard.eventbus.annotation.AggregateEvent;
+import com.richard.product.events.ProductCategoryCreatedEventImpl.Builder;
 import org.immutables.value.Value;
 
 import java.util.UUID;
@@ -17,5 +18,8 @@ public interface ProductCategoryCreatedEvent extends VersionedEvent {
 
     String getName();
 
+    static Builder newBuilder() {
+        return ProductCategoryCreatedEventImpl.builder();
+    }
 
 }
