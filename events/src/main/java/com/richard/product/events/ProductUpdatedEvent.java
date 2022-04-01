@@ -9,7 +9,6 @@ import java.util.UUID;
 @Value.Immutable
 @AggregateEvent
 @ApiStyle
-//@JsonDeserialize(builder = ProductCreatedEvent.Builder.class)
 public  interface ProductUpdatedEvent extends VersionedEvent {
 
     UUID getProductId() ;

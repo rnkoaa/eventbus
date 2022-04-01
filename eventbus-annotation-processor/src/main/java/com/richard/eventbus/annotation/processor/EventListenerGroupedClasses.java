@@ -65,4 +65,7 @@ public class EventListenerGroupedClasses {
         messager.printMessage(Kind.NOTE, String.format("writing %d entries to path %s", entries.size(), metaINFPath));
         IndexFileUtil.writeSimpleNameIndexFile(filer, entries, metaINFPath);
     }
+
+//    https://github.com/amoakoagyei/excalibur/blob/main/annotation-processor/src/main/java/com/excalibur/annotation/model/EventSourcingApplierGroupedClasses.java
+    // https://github.com/amoakoagyei/excalibur/blob/main/annotation-processor/src/main/java/com/excalibur/annotation/model/CommandHandlerGroupedClasses.java
 }

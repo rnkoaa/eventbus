@@ -1,0 +1,81 @@
+
+@Singleton
+@Named("eventAppliersAdapter")
+public final class EventAppliersAdapterImpl implements EventAppliersAdapter {
+  public static Map<Class<?>, ApplierBeanInfo> eventAppliers;
+
+  static {
+    eventAppliers = Map.ofEntries(
+    	new AbstractMap.SimpleEntry<>(ProductCreatedEvent.class, new ApplierBeanInfo("productCreatedEvent$Applier", ProductCreatedEvent$Applier.class)),
+    	new AbstractMap.SimpleEntry<>(ProductUpdatedEvent.class, new ApplierBeanInfo("productUpdatedEvent$Applier", ProductUpdatedEvent$Applier.class)),
+    	new AbstractMap.SimpleEntry<>(ProductVariantCreatedEvent.class, new ApplierBeanInfo("productVariantCreatedEvent$Applier", ProductVariantCreatedEvent$Applier.class)),
+    	new AbstractMap.SimpleEntry<>(ProductOptionAddedEvent.class, new ApplierBeanInfo("productOptionAddedEvent$Applier", ProductOptionAddedEvent$Applier.class)),
+    	new AbstractMap.SimpleEntry<>(ProductOptionUpdatedEvent.class, new ApplierBeanInfo("productOptionUpdatedEvent$Applier", ProductOptionUpdatedEvent$Applier.class)),
+    	new AbstractMap.SimpleEntry<>(ProductOptionRemovedEvent.class, new ApplierBeanInfo("productOptionRemovedEvent$Applier", ProductOptionRemovedEvent$Applier.class)),
+    	new AbstractMap.SimpleEntry<>(ProductVariantUpdatedEvent.class, new ApplierBeanInfo("productVariantUpdatedEvent$Applier", ProductVariantUpdatedEvent$Applier.class)),
+    	new AbstractMap.SimpleEntry<>(ProductImageUpdatedEvent.class, new ApplierBeanInfo("productImageUpdatedEvent$Applier", ProductImageUpdatedEvent$Applier.class)),
+    	new AbstractMap.SimpleEntry<>(ProductVariantAttributeUpdatedEvent.class, new ApplierBeanInfo("productVariantAttributeUpdatedEvent$Applier", ProductVariantAttributeUpdatedEvent$Applier.class)),
+    	new AbstractMap.SimpleEntry<>(AttributeRemovedFromProductVariantEvent.class, new ApplierBeanInfo("attributeRemovedFromProductVariantEvent$Applier", AttributeRemovedFromProductVariantEvent$Applier.class)),
+    	new AbstractMap.SimpleEntry<>(AttributeAddedToProductVariantEvent.class, new ApplierBeanInfo("attributeAddedToProductVariantEvent$Applier", AttributeAddedToProductVariantEvent$Applier.class)),
+    	new AbstractMap.SimpleEntry<>(ProductAttributeUpdatedEvent.class, new ApplierBeanInfo("productAttributeUpdatedEvent$Applier", ProductAttributeUpdatedEvent$Applier.class)),
+    	new AbstractMap.SimpleEntry<>(AttributeRemovedFromProductEvent.class, new ApplierBeanInfo("attributeRemovedFromProductEvent$Applier", AttributeRemovedFromProductEvent$Applier.class)),
+    	new AbstractMap.SimpleEntry<>(AttributeAddedToProductEvent.class, new ApplierBeanInfo("attributeAddedToProductEvent$Applier", AttributeAddedToProductEvent$Applier.class)),
+    	new AbstractMap.SimpleEntry<>(ImageRemovedFromProductVariantEvent.class, new ApplierBeanInfo("imageRemovedFromProductVariantEvent$Applier", ImageRemovedFromProductVariantEvent$Applier.class)),
+    	new AbstractMap.SimpleEntry<>(ProductVariantImageRemoved.class, new ApplierBeanInfo("productVariantImageRemoved$Applier", ProductVariantImageRemoved$Applier.class)),
+    	new AbstractMap.SimpleEntry<>(ImageRemovedFromProductEvent.class, new ApplierBeanInfo("imageRemovedFromProductEvent$Applier", ImageRemovedFromProductEvent$Applier.class)),
+    	new AbstractMap.SimpleEntry<>(ImageAddedToProductVariantEvent.class, new ApplierBeanInfo("imageAddedToProductVariantEvent$Applier", ImageAddedToProductVariantEvent$Applier.class)),
+    	new AbstractMap.SimpleEntry<>(ProductVariantImageUpdatedEvent.class, new ApplierBeanInfo("productVariantImageUpdatedEvent$Applier", ProductVariantImageUpdatedEvent$Applier.class)),
+    	new AbstractMap.SimpleEntry<>(ImageAddedToProductEvent.class, new ApplierBeanInfo("imageAddedToProductEvent$Applier", ImageAddedToProductEvent$Applier.class)),
+    	new AbstractMap.SimpleEntry<>(ProductVariantRemovedEvent.class, new ApplierBeanInfo("productVariantRemovedEvent$Applier", ProductVariantRemovedEvent$Applier.class))
+    );
+  }
+
+  private final ApplicationContext context;
+
+  public EventAppliersAdapterImpl(ApplicationContext context) {
+    this.context = context;
+  }
+
+  private Optional<Object> findEventSourcingHandler(Class<?> eventClass) {
+    return Optional.ofNullable(eventAppliers.get(eventClass))
+        	.flatMap(it -> context.findBean(it.beanClass(), Qualifiers.byName(it.beanName())));
+  }
+
+  private Try<EventApplier> getBeanClass(Class<?> eventClass) {
+    Class<?>[] interfaces = eventClass.getInterfaces();
+    var eventHandler = findEventSourcingHandler(eventClass)
+        	.or(() -> Arrays.stream(interfaces)
+        		.map(it -> findEventSourcingHandler(it))
+        		.filter(it -> it.isPresent())
+        		.findFirst()
+        		.orElseThrow(() -> new EventSourcingHandlerNotFoundException(eventClass))
+        	)
+        ;
+    return Option.ofOptional(eventHandler)
+        	.toTry()
+        	.map(it -> (EventApplier)it)
+        ;
+  }
+
+  @Override
+  public Try<AbstractAggregateRoot<? extends AggregateId, VersionedEvent>> applyEvent(
+      AbstractAggregateRoot<? extends AggregateId, VersionedEvent> aggregate, Object event) {
+    return getBeanClass(event.getClass())
+                	.map(applierBean -> applierBean.apply(aggregate, (VersionedEvent)event))
+        ;
+  }
+
+  @Override
+  public AbstractAggregateRoot<? extends AggregateId, VersionedEvent> applyEventsForAggregate(
+      AbstractAggregateRoot<? extends AggregateId, VersionedEvent> aggregate) {
+    return aggregate.getChanges()
+    	.stream()
+    	.collect(() -> {
+    		return aggregate;
+    	}, (seedAggregate, event) -> {
+    		applyEvent(seedAggregate, event);
+    	}, (prevAggregate, nextAggregate) -> {
+    		// Do nothing, we should not run this will parallel mode
+    	});
+  }
+}
