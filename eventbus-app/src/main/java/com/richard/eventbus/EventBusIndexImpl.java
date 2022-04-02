@@ -1,6 +1,6 @@
 package com.richard.eventbus;
 
-import com.richard.eventbus.framework.EventBusIndex;
+import com.richard.eventbus.annotation.processor.EventBusIndex;
 import com.richard.eventbus.framework.EventHandlerClassInfo;
 import com.richard.product.events.ProductCategoryCreatedEvent;
 import com.richard.product.events.ProductCreatedEvent;
@@ -8,6 +8,7 @@ import com.richard.product.events.ProductDeactivatedEvent;
 import com.richard.product.events.ProductUpdatedEvent;
 import com.richard.product.events.listener.ProductCategoryCreatedEventListener;
 import com.richard.product.events.listener.ProductCreatedEventListener;
+import com.richard.product.events.listener.ProductCreatedEventLoggerListener;
 import com.richard.product.events.listener.ProductDeactivatedEventListener;
 import com.richard.product.events.listener.ProductUpdatedEventListener;
 
@@ -21,21 +22,30 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class EventBusIndexImpl implements EventBusIndex {
 
-    private static final Map<Class<?>, EventHandlerClassInfo> eventHandlers = new ConcurrentHashMap<>();
+    private static Map<Class<?>, EventHandlerClassInfo> eventHandlers = new ConcurrentHashMap<>();
 
     static {
-        eventHandlers.put(ProductCreatedEvent.class, new EventHandlerClassInfo(
-            ProductCreatedEvent.class, ProductCreatedEventListener.class, "on"
-        ));
-        eventHandlers.put(ProductUpdatedEvent.class, new EventHandlerClassInfo(
-            ProductUpdatedEvent.class, ProductUpdatedEventListener.class, "on"
-        ));
-        eventHandlers.put(ProductDeactivatedEvent.class, new EventHandlerClassInfo(
-            ProductDeactivatedEvent.class, ProductDeactivatedEventListener.class, "on"
-        ));
-        eventHandlers.put(ProductCategoryCreatedEvent.class, new EventHandlerClassInfo(
-            ProductCategoryCreatedEvent.class, ProductCategoryCreatedEventListener.class, "on"
-        ));
+//        eventHandlers.put(ProductCreatedEvent.class, new EventHandlerClassInfo(
+//            ProductCreatedEvent.class, ProductCreatedEventListener.class, "on"
+//        ));
+//        eventHandlers.put(ProductUpdatedEvent.class, new EventHandlerClassInfo(
+//            ProductUpdatedEvent.class, ProductUpdatedEventListener.class, "on"
+//        ));
+//        eventHandlers.put(ProductDeactivatedEvent.class, new EventHandlerClassInfo(
+//            ProductDeactivatedEvent.class, ProductDeactivatedEventListener.class, "on"
+//        ));
+//        eventHandlers.put(ProductCategoryCreatedEvent.class, new EventHandlerClassInfo(
+//            ProductCategoryCreatedEvent.class, ProductCategoryCreatedEventListener.class, "on"
+//        ));
+        eventHandlers = new ConcurrentHashMap<>(
+                Map.ofEntries(
+                        Map.entry(ProductCreatedEvent.class, new EventHandlerClassInfo(ProductCreatedEvent.class, ProductCreatedEventLoggerListener.class, "on")),
+                        Map.entry(ProductCreatedEvent.class, new EventHandlerClassInfo(ProductCreatedEvent.class, ProductCreatedEventListener.class, "on")),
+                        Map.entry(ProductDeactivatedEvent.class, new EventHandlerClassInfo(ProductDeactivatedEvent.class, ProductDeactivatedEventListener.class, "on")),
+                        Map.entry(ProductUpdatedEvent.class, new EventHandlerClassInfo(ProductUpdatedEvent.class, ProductUpdatedEventListener.class, "on")),
+                        Map.entry(ProductCategoryCreatedEvent.class, new EventHandlerClassInfo(ProductCategoryCreatedEvent.class, ProductCategoryCreatedEvent.class, "on"))
+                )
+        ) ;
     }
 
     @Override

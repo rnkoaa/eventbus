@@ -1,7 +1,7 @@
 package com.richard.eventbus;
 
 import com.richard.eventbus.framework.EventBus;
-import com.richard.eventbus.framework.EventBusIndex;
+import com.richard.eventbus.annotation.processor.EventBusIndex;
 import com.richard.eventbus.framework.EventBusRegistrar;
 import com.richard.product.events.Product;
 import com.richard.product.events.ProductCreatedEvent;

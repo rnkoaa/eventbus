@@ -24,8 +24,8 @@ import javax.lang.model.element.VariableElement;
 
 @AutoService(Processor.class)
 @SupportedOptions(value = {
-    EventListenerProcessor.OPTION_EVENT_BUS_INDEX,
-    EventListenerProcessor.OPTION_EVENT_BUS_INDEX_PACKAGE
+        EventListenerProcessor.OPTION_EVENT_BUS_INDEX,
+        EventListenerProcessor.OPTION_EVENT_BUS_INDEX_PACKAGE
 })
 @SupportedSourceVersion(SourceVersion.RELEASE_17)
 public class EventListenerProcessor extends AbstractAnnotationProcessor {
@@ -54,8 +54,8 @@ public class EventListenerProcessor extends AbstractAnnotationProcessor {
         Set<? extends Element> elementsAnnotatedWith = roundEnv.getElementsAnnotatedWith(EventListener.class);
 
         Set<? extends Element> invalidElements = elementsAnnotatedWith.stream()
-            .filter(element -> !element.getKind().equals(ElementKind.METHOD))
-            .collect(Collectors.toSet());
+                .filter(element -> !element.getKind().equals(ElementKind.METHOD))
+                .collect(Collectors.toSet());
 
         if (invalidElements.size() > 0) {
             invalidElements.forEach(element -> {
@@ -65,11 +65,11 @@ public class EventListenerProcessor extends AbstractAnnotationProcessor {
         }
 
         Set<ErrorElement> errorElements = elementsAnnotatedWith.stream()
-            .filter(element -> element.getKind().equals(ElementKind.METHOD))
-            .map(element -> (ExecutableElement) element)
-            .map(this::checkHasNoErrors)
-            .filter(Objects::nonNull)
-            .collect(Collectors.toSet());
+                .filter(element -> element.getKind().equals(ElementKind.METHOD))
+                .map(element -> (ExecutableElement) element)
+                .map(this::checkHasNoErrors)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
 
         if (errorElements.size() > 0) {
             for (ErrorElement errorElement : errorElements) {
@@ -83,21 +83,23 @@ public class EventListenerProcessor extends AbstractAnnotationProcessor {
 //            !annotations.isEmpty() + ", processingOver: " + roundEnv.processingOver());
 
         elementsAnnotatedWith.stream()
-            .filter(element -> element.getKind().equals(ElementKind.METHOD))
-            .map(element -> (ExecutableElement) element)
-            .forEach(element -> {
-                try {
-                    eventListenerGroupedClasses.add(new EventListenerAnnotatedClass(typeUtils, elementUtils, element));
-                } catch (ProcessingException ex) {
-                    error(ex.element, ex.getMessage());
-                }
-            });
+                .filter(element -> element.getKind().equals(ElementKind.METHOD))
+                .map(element -> (ExecutableElement) element)
+                .forEach(element -> {
+                    try {
+                        eventListenerGroupedClasses.add(new EventListenerAnnotatedClass(typeUtils, elementUtils,
+                                (TypeElement)element.getEnclosingElement(),
+                                element));
+                    } catch (ProcessingException ex) {
+                        error(ex.element, ex.getMessage());
+                    }
+                });
 
         if (roundEnv.processingOver()) {
             note("found %d classes to write", eventListenerGroupedClasses.size());
             try {
                 eventListenerGroupedClasses.writeIndexFile(indexFilePath, messager, filer);
-                eventListenerGroupedClasses.generateEventBusIndexClass(indexFilePackage, messager, filer);
+                eventListenerGroupedClasses.generateEventBusIndexClass(indexFilePackage, typeUtils, messager, filer);
                 eventListenerGroupedClasses.clear();
             } catch (IOException e) {
                 throw new RuntimeException(e);

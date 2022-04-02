@@ -1,6 +1,7 @@
 package com.richard.eventbus.framework;
 
 import com.richard.eventbus.annotation.EventListener;
+import com.richard.eventbus.annotation.processor.EventBusIndex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

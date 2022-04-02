@@ -1,4 +1,6 @@
-package com.richard.eventbus.framework;
+package com.richard.eventbus.annotation.processor;
+
+import com.richard.eventbus.framework.EventHandlerClassInfo;
 
 import java.util.Map;
 import java.util.Optional;

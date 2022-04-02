@@ -8,6 +8,7 @@ import javax.lang.model.util.Types;
 
 public record EventListenerAnnotatedClass(Types typeUtils,
                                           Elements elementUtils,
+                                          TypeElement listenerElement,
                                           ExecutableElement element) {
 
     public boolean isConstructor() {
@@ -24,7 +25,6 @@ public record EventListenerAnnotatedClass(Types typeUtils,
     }
 
     public String getId() {
-        TypeElement classElement = (TypeElement) element.getEnclosingElement();
-        return classElement.getQualifiedName().toString();
+        return listenerElement.getQualifiedName().toString();
     }
 }

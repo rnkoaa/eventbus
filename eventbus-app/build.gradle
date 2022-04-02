@@ -13,10 +13,9 @@ repositories {
 
 dependencies {
     implementation(project(":eventbus-annotations"))
-    implementation(project(":eventbus-framework"))
 
-    annotationProcessor(project(":eventbus-annotation-processor"))
-    implementation(project(":eventbus-annotation-processor"))
+    implementation(project(":eventbus-framework"))
+    annotationProcessor(project(":eventbus-framework"))
 
     implementation(project(":events"))
     annotationProcessor("io.micronaut:micronaut-http-validation")
