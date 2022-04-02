@@ -12,6 +12,7 @@ repositories {
 dependencies {
     implementation(project(":eventbus-annotations"))
     implementation(project(":eventbus-annotation-processor"))
+    implementation(project(":eventbus-framework"))
 
     // immutables java annotations
     compileOnly "org.immutables:value:$immutablesVersion"
@@ -28,7 +29,8 @@ dependencies {
 
 tasks.withType(JavaCompile) {
     options.compilerArgs = [
-            '-Aevent.bus.index=event-bus/com.richard.eventbus.EventIndexFile'
+            '-Aevent.bus.index=event-bus/com.richard.eventbus.EventIndexFile',
+            '-Aevent.bus.index.package=com.richard.eventbus'
     ]
 }
 
