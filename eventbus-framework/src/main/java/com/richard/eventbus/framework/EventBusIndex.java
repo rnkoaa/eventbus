@@ -1,7 +1,5 @@
 package com.richard.eventbus.framework;
 
-import com.richard.eventbus.framework.EventHandlerClassInfo;
-
 import java.util.Collection;
 
 public interface EventBusIndex {
