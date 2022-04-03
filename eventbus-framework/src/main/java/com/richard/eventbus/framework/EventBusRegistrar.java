@@ -1,7 +1,6 @@
 package com.richard.eventbus.framework;
 
 import com.richard.eventbus.annotation.EventListener;
-import com.richard.eventbus.annotation.processor.EventBusIndex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,8 +23,8 @@ public class EventBusRegistrar {
 
     public EventBus build() {
         EventBus eventBus = InMemoryEventBus.getInstance();
-        eventBusIndex.getEventHandlers()
-                .values()
+
+        eventBusIndex.getAllEventHandlerClassInfos()
                 .stream()
                 .map(eventHandlerClassInfo -> findHandlerMethod(eventHandlerClassInfo)
                         .map(eventHandlerClassInfo::withHandlerMethod))

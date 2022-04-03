@@ -6,6 +6,8 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.WildcardTypeName;
+
+import java.util.List;
 import java.util.Map;
 
 public class JavaPoetHelpers {
@@ -21,27 +23,10 @@ public class JavaPoetHelpers {
         return ParameterizedTypeName.get(
             ClassName.get(Map.class),
             classOfAny(),
-            ClassName.get(EventHandlerClassInfo.class)
+            ParameterizedTypeName.get(
+                ClassName.get(List.class),
+                ClassName.get(EventHandlerClassInfo.class)
+            )
         );
     }
-
-//    public static ParameterizedTypeName getParameterizedAggregateRoot() {
-//        TypeName aggregateIdWildCard = WildcardTypeName.subtypeOf(AggregateId.class);
-//        return ParameterizedTypeName.get(
-//            ClassName.get(AbstractAggregateRoot.class), aggregateIdWildCard,
-//            ClassName.get(VersionedEvent.class));
-//    }
-//
-//    public static FieldSpec generateEventsApplierMapField(String fieldName) {
-//        return FieldSpec.builder(
-//                ParameterizedTypeName.get(
-//                    ClassName.get(Map.class),
-//                    classOfAny(),
-//                    eventApplierBeanName
-//                ),
-//                fieldName
-//            )
-//            .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-//            .build();
-//    }
 }
