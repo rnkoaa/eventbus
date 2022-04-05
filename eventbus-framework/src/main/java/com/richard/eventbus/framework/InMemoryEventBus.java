@@ -2,18 +2,39 @@ package com.richard.eventbus.framework;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
+
+class PostingMessage {
+}
+
+class AsyncPostingWorker implements Runnable {
+    private final BlockingQueue<PostingMessage> queue;
+
+    AsyncPostingWorker(BlockingQueue<PostingMessage> queue) {
+        this.queue = queue;
+    }
+
+    void shutdown() {
+
+    }
+
+    @Override
+    public void run() {
+
+    }
+}
 
 public class InMemoryEventBus implements EventBus {
 
@@ -21,6 +42,13 @@ public class InMemoryEventBus implements EventBus {
     private LogListener logListener;
     private static volatile InMemoryEventBus instance;
     private static final Map<Class<?>, List<EventHandlerClassInfo>> handlers = new ConcurrentHashMap<>();
+    private ExecutorService executorService;
+    private BlockingQueue<PostingMessage> queue;
+
+    public InMemoryEventBus() {
+        executorService = Executors.newFixedThreadPool(1);
+        queue = new LinkedBlockingQueue<>(10);
+    }
 
     public void registerLogger(LogListener logListener) {
         this.logListener = logListener;
@@ -59,11 +87,12 @@ public class InMemoryEventBus implements EventBus {
         }
 
         // potentially, this class implements an interface that is handled.
-        record InterfaceHandler(Class<?> interfaceClass, List<EventHandlerClassInfo> eventHandlerClassInfos) {}
+        record InterfaceHandler(Class<?> interfaceClass, List<EventHandlerClassInfo> eventHandlerClassInfos) {
+        }
 
         // we only care about the immediate interfaces of classes. This prevents deep hierachical code inheritance
-        Class<?>[] interfaces = clzz.getInterfaces();
-        List<InterfaceHandler> interfaceHandlers = Stream.of(interfaces)
+        Set<Class<?>> interfaces = getInterfaces(clzz);
+        List<InterfaceHandler> interfaceHandlers = interfaces.stream()
             .map(clzzInterface -> new InterfaceHandler(clzzInterface, handlers.get(clzzInterface)))
             .filter(interfaceHandler -> interfaceHandler.eventHandlerClassInfos != null)
             .toList();
@@ -137,4 +166,21 @@ public class InMemoryEventBus implements EventBus {
     public void unRegister(EventHandlerClassInfo subscriber) {
 
     }
+
+    private Set<Class<?>> getInterfaces(Class<?> clzz) {
+        Set<Class<?>> interfaces = new HashSet<>();
+        addInterfaces(interfaces, clzz.getInterfaces());
+        return Set.copyOf(interfaces);
+    }
+
+    /**
+     * Recurses through super interfaces.
+     */
+    static void addInterfaces(Set<Class<?>> eventTypes, Class<?>[] interfaces) {
+        for (Class<?> interfaceClass : interfaces) {
+            eventTypes.add(interfaceClass);
+            addInterfaces(eventTypes, interfaceClass.getInterfaces());
+        }
+    }
+
 }

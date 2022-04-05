@@ -1,2 +1,99 @@
 https://github.com/yonik/java_util/blob/master/src/util/hash/MurmurHash3.java
 https://github.com/yonik/java_util/blob/master/test/util/hash/TestMurmurHash3.java
+
+public class Application implements ApplicationEventListener<StartupEvent> {
+
+    private final EventBus eventBus;
+
+    public Application(EventBus eventBus) {
+        this.eventBus = eventBus;
+    }
+
+    public static void main(String[] args) throws InterruptedException {
+
+        Bus bus = new Bus();
+        for (int index = 0; index < 500; index++) {
+            bus.publish(new Post(String.valueOf(index), String.format("Post #%d", index), String.format("posting index %d to bus", index)));
+        }
+
+        Thread.sleep(1000);
+        for (int index = 0; index < 800; index++) {
+            bus.publish(new Post(String.valueOf(index), String.format("Post #%d", index), String.format("posting index %d to bus", index)));
+        }
+
+        Runtime.getRuntime().addShutdownHook(new Thread(bus::shutdown));
+    }
+
+    @Override
+    public void onApplicationEvent(StartupEvent event) {
+        eventBus.registerDeadLetterListener(object ->
+            System.out.println("Got a Dead letter event of type " + object.getClass() + ", Value: " + object)
+        );
+//
+        eventBus.publish(ProductCreatedEvent.newBuilder()
+            .aggregateId(UUID.randomUUID())
+            .id(UUID.randomUUID())
+            .productId(UUID.randomUUID())
+            .aggregateName(Product.class.getSimpleName())
+            .name("Product 1")
+            .sku("Product 2")
+            .build());
+        eventBus.publish(ProductDeactivatedEvent.newBuilder()
+            .aggregateId(UUID.randomUUID())
+            .id(UUID.randomUUID())
+            .aggregateName(Product.class.getSimpleName())
+            .build());
+    }
+}
+
+class Bus {
+    BlockingQueue<Message> queue = new LinkedBlockingQueue<>(1000);
+    private final ExecutorService executorService;
+
+    Bus() {
+        executorService = Executors.newFixedThreadPool(2);
+        executorService.submit(() -> {
+            while (true) {
+                Post item;
+                try {
+                    item = queue.take();
+					if(item.messageToPost instanceOf PoisonPil) {
+						System.out.println("Got a Poison Pil");
+						return
+					}
+
+					item.subscribers.forEach(subscriber -> {
+						subscriber.handle(item.messageToPost)
+					})
+
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                System.out.println("Read Item -> " + item);
+            }
+        });
+    }
+
+    void publish(Object object) {
+            queue.add(new Message(object));
+    }
+
+    public void shutdown() {
+        publish(new Post("poison", "poison", "poison"));
+        executorService.shutdownNow();
+    }
+}
+
+class Message {
+	Object messageToPost;
+	List<EventHandlerInfo> subscribers
+
+	public Message(Object object){
+		this.messageToPost = object;
+	}
+}
+
+record PoisonPil() {}
+
+record Post(String id, String title, String content) {
+}
