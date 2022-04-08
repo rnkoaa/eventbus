@@ -9,6 +9,6 @@ public class ProductCreatedEventListener {
 
     @EventListener
     public void on(ProductCreatedEvent event) {
-        System.out.println("Got event " + event);
+        System.out.println("ProductCreatedEventListener::12 Got event " + event);
     }
 }
