@@ -9,6 +9,6 @@ public class ProductDeactivatedEventListener {
 
     @EventListener
     public void on(ProductDeactivatedEvent event) {
-        System.out.println("Deactivate Product " + event);
+        System.out.println("Deactivate Product: " + event);
     }
 }
