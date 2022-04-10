@@ -18,6 +18,7 @@ dependencies {
     annotationProcessor(project(":eventbus-framework"))
 
     implementation(project(":events"))
+
     annotationProcessor("io.micronaut:micronaut-http-validation")
     implementation("io.micronaut:micronaut-http-client")
     implementation("io.micronaut:micronaut-jackson-databind")
@@ -39,6 +40,7 @@ java {
 
 graalvmNative.toolchainDetection = false
 micronaut {
+    runtime("netty")
     testRuntime("junit5")
     processing {
         incremental(true)

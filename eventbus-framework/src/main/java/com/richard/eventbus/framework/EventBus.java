@@ -1,5 +1,6 @@
 package com.richard.eventbus.framework;
 
+import java.util.List;
 import java.util.Set;
 
 public interface EventBus {
@@ -10,11 +11,15 @@ public interface EventBus {
 
     void register(EventHandlerClassInfo subscriber);
 
+    List<EventHandlerClassInfo> findHandlers(Class<?> clzz);
+
     void publish(Object event);
 
     Set<EventHandlerClassInfo> getSubscribers();
 
     void unRegister(EventHandlerClassInfo subscriber);
+
+
 
     /**
      * This stops all background threads and shuts down any thread pools used for background processing

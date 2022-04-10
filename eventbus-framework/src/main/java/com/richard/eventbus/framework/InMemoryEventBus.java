@@ -1,27 +1,35 @@
 package com.richard.eventbus.framework;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 public class InMemoryEventBus implements EventBus {
 
+    record ScheduledQueueMonitor(BlockingQueue<Message> queue) implements Runnable {
+
+        @Override
+        public void run() {
+            int size = queue.size();
+            System.out.printf("[%s] - current queue size: %d\n", LocalDateTime.now(), size);
+        }
+    }
+
     private DeadLetterEventListener deadLetterEventListener;
     private LogListener logListener;
     private static volatile InMemoryEventBus instance;
     private static final Map<Class<?>, List<EventHandlerClassInfo>> handlers = new ConcurrentHashMap<>();
-    private ExecutorService executorService;
-    private BlockingQueue<Message> queue;
+    private final ExecutorService executorService;
     private final BackgroundMessagePostingThread postingThread;
     private boolean enabled = true;
 
     public InMemoryEventBus(BusConfig busConfig) {
-
-        queue = new ArrayBlockingQueue<>((int) busConfig.defaultQueueSize());
+        BlockingQueue<Message> queue = new ArrayBlockingQueue<>((int) busConfig.defaultQueueSize());
         this.postingThread = new BackgroundMessagePostingThread(queue);
         executorService = Executors.newCachedThreadPool();
-        queue = new LinkedBlockingQueue<>(10);
-        executorService.submit(new MessageProcessingWorker(queue, busConfig));
+        executorService.submit(new MessageProcessingWorker(this, queue, busConfig));
+        Executors.newScheduledThreadPool(1).scheduleAtFixedRate(new ScheduledQueueMonitor(queue), 2, 5, TimeUnit.SECONDS);
     }
 
     public void registerLogger(LogListener logListener) {
@@ -54,7 +62,8 @@ public class InMemoryEventBus implements EventBus {
         handlers.put(eventHandlerClassInfo.eventClass(), eventHandlers);
     }
 
-    List<EventHandlerClassInfo> findHandler(Class<?> clzz) {
+    @Override
+    public List<EventHandlerClassInfo> findHandlers(Class<?> clzz) {
         List<EventHandlerClassInfo> eventHandlers = handlers.getOrDefault(clzz, new ArrayList<>());
         if (eventHandlers.size() > 0) {
             return eventHandlers;
@@ -91,7 +100,6 @@ public class InMemoryEventBus implements EventBus {
         }
 
         // look for the immediate super class to see if it is available to use
-
         return Collections.emptyList();
     }
 
@@ -117,22 +125,26 @@ public class InMemoryEventBus implements EventBus {
             logListener.onEvent(event);
         }
 
-        List<EventHandlerClassInfo> eventHandlers = findHandler(event.getClass());
-        if (eventHandlers.size() == 0 && deadLetterEventListener != null) {
-            deadLetterEventListener.onEvent(event);
-            return;
-        }
+//        List<EventHandlerClassInfo> eventHandlers = findHandlers(event.getClass());
+//        if (eventHandlers.size() == 0 && deadLetterEventListener != null) {
+//            deadLetterEventListener.onEvent(event);
+//            return;
+//        }
 
-        System.out.println("Found " + eventHandlers.size() + " for event " + event);
+//        eventHandlers.forEach(eventHandlerClassInfo -> {
+//            postingThread.post(
+//                    Message.builder()
+//                            .withData(event)
+////                            .withHandlerClassInfo(eventHandlerClassInfo)
+//                            .build()
+//            );
+//        });
 
-        eventHandlers.forEach(eventHandlerClassInfo -> {
-            postingThread.post(
-                    Message.builder()
-                            .withData(event)
-                            .withHandlerClassInfo(eventHandlerClassInfo)
-                            .build()
-            );
-        });
+        postingThread.post(
+                Message.builder()
+                        .withData(event)
+                        .build()
+        );
     }
 
     @Override

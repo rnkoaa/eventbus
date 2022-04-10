@@ -32,7 +32,8 @@ public class MessageBuilder {
     }
 
     public Message build() {
-        return new Message(id, timestamp, context, eventHandlerClassInfo);
+        return new Message(id, timestamp, context);
+//        return new Message(id, timestamp, context, eventHandlerClassInfo);
     }
 
 }

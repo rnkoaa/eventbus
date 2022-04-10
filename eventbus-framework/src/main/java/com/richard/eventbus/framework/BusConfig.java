@@ -5,6 +5,6 @@ public record BusConfig(
         long pollTimeout,
         long defaultQueueSize) {
     public BusConfig() {
-        this(500, 500, 200);
+        this(1000, 1000, 200);
     }
 }

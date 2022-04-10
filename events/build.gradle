@@ -19,6 +19,9 @@ dependencies {
     annotationProcessor "org.immutables:value:$immutablesVersion"
 
 //    annotationProcessor(project(":eventbus-annotation-processor"))
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.13.2.2")
+    implementation("com.fasterxml.jackson.core:jackson-core:2.13.2")
+    implementation("com.fasterxml.jackson.core:jackson-annotations:2.13.2")
 
     implementation('io.micronaut:micronaut-inject-java:3.4.0')
     annotationProcessor('io.micronaut:micronaut-inject-java:3.4.0')
