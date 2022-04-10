@@ -23,21 +23,23 @@ public record EventHandlerClassInfo(Class<?> eventClass,
             throw new IllegalArgumentException("cannot add a null class instance to handler Info");
         }
         return new EventHandlerClassInfo(this.eventClass, this.eventListenerClass,
-            this.methodName,
-            eventListenerInstance,
-            this.handlerMethod);
+                this.methodName,
+                eventListenerInstance,
+                this.handlerMethod);
     }
 
     public EventHandlerClassInfo withHandlerMethod(Method handlerMethod) {
         if (eventListenerInstance == null) {
-            throw new IllegalArgumentException("cannot add a null class instance to handler Info for event class" + eventClass);
+            throw new IllegalArgumentException(
+                    "cannot add a null class instance to handler Info for event class '" + eventClass + "'"
+            );
         }
         return new EventHandlerClassInfo(
-            this.eventClass,
-            this.eventListenerClass,
-            this.methodName,
-            this.eventListenerInstance,
-            handlerMethod
+                this.eventClass,
+                this.eventListenerClass,
+                this.methodName,
+                this.eventListenerInstance,
+                handlerMethod
         );
     }
 
@@ -51,8 +53,8 @@ public record EventHandlerClassInfo(Class<?> eventClass,
         if (o == null || getClass() != o.getClass()) return false;
         EventHandlerClassInfo that = (EventHandlerClassInfo) o;
         return eventClass.equals(that.eventClass)
-            && eventListenerClass.equals(that.eventListenerClass)
-            && methodName.equals(that.methodName);
+                && eventListenerClass.equals(that.eventListenerClass)
+                && methodName.equals(that.methodName);
     }
 
     @Override

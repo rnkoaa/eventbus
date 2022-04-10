@@ -1,4 +1,4 @@
-package com.richard.eventbus;
+package com.richard.eventbus.framework;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -7,7 +7,7 @@ public class MessageBuilder {
     private UUID id;
     private Object context;
     private Instant timestamp;
-    private SubscriberMethod subscriberMethod;
+    private EventHandlerClassInfo eventHandlerClassInfo;
 
     public MessageBuilder() {
     }
@@ -16,8 +16,8 @@ public class MessageBuilder {
         this.context = data;
         return this;
     }
-    public MessageBuilder withSubscriberMethod(SubscriberMethod subscriberMethod) {
-        this.subscriberMethod = subscriberMethod;
+    public MessageBuilder withHandlerClassInfo(EventHandlerClassInfo eventHandlerClassInfo) {
+        this.eventHandlerClassInfo = eventHandlerClassInfo;
         return this;
     }
 
@@ -32,7 +32,7 @@ public class MessageBuilder {
     }
 
     public Message build() {
-        return new Message(id, timestamp, context, subscriberMethod);
+        return new Message(id, timestamp, context, eventHandlerClassInfo);
     }
 
 }

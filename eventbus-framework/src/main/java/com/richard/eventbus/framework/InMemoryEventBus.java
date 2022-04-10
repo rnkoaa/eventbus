@@ -1,40 +1,8 @@
 package com.richard.eventbus.framework;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.*;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
-
-class PostingMessage {
-}
-
-class AsyncPostingWorker implements Runnable {
-    private final BlockingQueue<PostingMessage> queue;
-
-    AsyncPostingWorker(BlockingQueue<PostingMessage> queue) {
-        this.queue = queue;
-    }
-
-    void shutdown() {
-
-    }
-
-    @Override
-    public void run() {
-
-    }
-}
 
 public class InMemoryEventBus implements EventBus {
 
@@ -43,11 +11,17 @@ public class InMemoryEventBus implements EventBus {
     private static volatile InMemoryEventBus instance;
     private static final Map<Class<?>, List<EventHandlerClassInfo>> handlers = new ConcurrentHashMap<>();
     private ExecutorService executorService;
-    private BlockingQueue<PostingMessage> queue;
+    private BlockingQueue<Message> queue;
+    private final BackgroundMessagePostingThread postingThread;
+    private boolean enabled = true;
 
-    public InMemoryEventBus() {
-        executorService = Executors.newFixedThreadPool(1);
+    public InMemoryEventBus(BusConfig busConfig) {
+
+        queue = new ArrayBlockingQueue<>((int) busConfig.defaultQueueSize());
+        this.postingThread = new BackgroundMessagePostingThread(queue);
+        executorService = Executors.newCachedThreadPool();
         queue = new LinkedBlockingQueue<>(10);
+        executorService.submit(new MessageProcessingWorker(queue, busConfig));
     }
 
     public void registerLogger(LogListener logListener) {
@@ -62,7 +36,7 @@ public class InMemoryEventBus implements EventBus {
         if (instance == null) {
             synchronized (InMemoryEventBus.class) {
                 if (instance == null) {
-                    instance = new InMemoryEventBus();
+                    instance = new InMemoryEventBus(new BusConfig());
                 }
             }
         }
@@ -72,8 +46,8 @@ public class InMemoryEventBus implements EventBus {
     @Override
     public void register(EventHandlerClassInfo eventHandlerClassInfo) {
         List<EventHandlerClassInfo> eventHandlers = handlers.getOrDefault(
-            eventHandlerClassInfo.eventClass(),
-            new ArrayList<>()
+                eventHandlerClassInfo.eventClass(),
+                new ArrayList<>()
         );
 
         eventHandlers.add(eventHandlerClassInfo);
@@ -93,9 +67,9 @@ public class InMemoryEventBus implements EventBus {
         // we only care about the immediate interfaces of classes. This prevents deep hierachical code inheritance
         Set<Class<?>> interfaces = getInterfaces(clzz);
         List<InterfaceHandler> interfaceHandlers = interfaces.stream()
-            .map(clzzInterface -> new InterfaceHandler(clzzInterface, handlers.get(clzzInterface)))
-            .filter(interfaceHandler -> interfaceHandler.eventHandlerClassInfos != null)
-            .toList();
+                .map(clzzInterface -> new InterfaceHandler(clzzInterface, handlers.get(clzzInterface)))
+                .filter(interfaceHandler -> interfaceHandler.eventHandlerClassInfos != null)
+                .toList();
 
         if (interfaceHandlers.size() > 0) {
             for (InterfaceHandler interfaceHandler : interfaceHandlers) {
@@ -103,8 +77,8 @@ public class InMemoryEventBus implements EventBus {
             }
 
             return interfaceHandlers.stream()
-                .flatMap(it -> it.eventHandlerClassInfos.stream())
-                .toList();
+                    .flatMap(it -> it.eventHandlerClassInfos.stream())
+                    .toList();
         }
 
         Class<?> superclass = clzz.getSuperclass();
@@ -127,6 +101,18 @@ public class InMemoryEventBus implements EventBus {
             throw new EventListenerException("unable to register a listener. should not be null");
         }
 
+        // stop all processing
+        if (event instanceof PoisonPill) {
+            executorService.shutdown();
+            enabled = false;
+            return;
+        }
+
+        if (!enabled) {
+            System.out.println("Bus is not enabled, message will not be delivered.");
+            return;
+        }
+
         if (logListener != null && logListener.isEnabled()) {
             logListener.onEvent(event);
         }
@@ -137,29 +123,24 @@ public class InMemoryEventBus implements EventBus {
             return;
         }
 
-        for (EventHandlerClassInfo eventHandler : eventHandlers) {
-            Method method = eventHandler.handlerMethod();
-            Object handlerInstance = eventHandler.eventListenerInstance();
-            try {
-                method.invoke(handlerInstance, event);
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                throw new EventBusException(
-                    String.format("Failed to dispatch event %s@%d to listener %s@%d",
-                        event.getClass().getName(),
-                        System.identityHashCode(event),
-                        handlerInstance.getClass().getName(),
-                        System.identityHashCode(handlerInstance)),
-                    e);
-            }
-        }
+        System.out.println("Found " + eventHandlers.size() + " for event " + event);
+
+        eventHandlers.forEach(eventHandlerClassInfo -> {
+            postingThread.post(
+                    Message.builder()
+                            .withData(event)
+                            .withHandlerClassInfo(eventHandlerClassInfo)
+                            .build()
+            );
+        });
     }
 
     @Override
     public Set<EventHandlerClassInfo> getSubscribers() {
         return handlers.values()
-            .stream()
-            .filter(it -> it != null && it.size() > 0)
-            .flatMap(Collection::stream).collect(Collectors.toSet());
+                .stream()
+                .filter(it -> it != null && it.size() > 0)
+                .flatMap(Collection::stream).collect(Collectors.toSet());
     }
 
     @Override
@@ -181,6 +162,17 @@ public class InMemoryEventBus implements EventBus {
             eventTypes.add(interfaceClass);
             addInterfaces(eventTypes, interfaceClass.getInterfaces());
         }
+    }
+
+    /*****/
+    static Set<Class<?>> getSuperClasses(Class<?> clzz) {
+        Set<Class<?>> classes = new HashSet<>();
+        Class<?> superclass = clzz.getSuperclass();
+        while (superclass != Object.class) {
+            classes.add(superclass);
+            superclass = superclass.getSuperclass();
+        }
+        return classes;
     }
 
 }

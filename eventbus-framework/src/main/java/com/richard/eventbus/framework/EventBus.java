@@ -15,4 +15,11 @@ public interface EventBus {
     Set<EventHandlerClassInfo> getSubscribers();
 
     void unRegister(EventHandlerClassInfo subscriber);
+
+    /**
+     * This stops all background threads and shuts down any thread pools used for background processing
+     */
+    default void stop() {
+        publish(new PoisonPill());
+    }
 }
