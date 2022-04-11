@@ -5,12 +5,17 @@ PRAGMA foreign_keys = ON;
 
 CREATE TABLE IF NOT EXISTS category (
     id INTEGER PRIMARY KEY,
-    category_name TEXT NOT NULL,
-    is_active BOOLEAN,
-    created_on TEXT,
+    name TEXT NOT NULL,
+    active BOOLEAN,
+    created_at TEXT,
     updated_at TEXT,
     version INTEGER
 );
+
+-- [jooq ignore start]
+  CREATE UNIQUE INDEX IF NOT EXISTS idx_category_name
+      ON category (name);
+-- [jooq ignore stop]
 
 CREATE TABLE IF NOT EXISTS  product (
     id INTEGER PRIMARY KEY,
@@ -20,8 +25,8 @@ CREATE TABLE IF NOT EXISTS  product (
     summary TEXT,
     website_url TEXT,
     price JSON,
-    is_active BOOLEAN,
-    created_on TEXT,
+    active BOOLEAN,
+    created_at TEXT,
     updated_at TEXT,
     version INTEGER
 );
@@ -38,7 +43,7 @@ CREATE TABLE IF NOT EXISTS product_images (
     product_id INTEGER NOT NULL,
     image_slug TEXT,
     caption TEXT,
-    created_on TEXT,
+    created_at TEXT,
     updated_at TEXT,
     version INTEGER,
     CONSTRAINT fk_pi_product_id FOREIGN KEY (product_id) REFERENCES product (id)

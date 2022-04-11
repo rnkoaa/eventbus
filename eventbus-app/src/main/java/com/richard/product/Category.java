@@ -4,19 +4,19 @@ import java.time.Instant;
 import java.util.List;
 
 public class Category {
-    private String id;
+    private int id;
     private String name;
-    private boolean active;
-    private Instant createdAt;
-    private Instant updatedAt;
-    private int version;
-    private List<Product> products;
+    private boolean active = true;
+    private Instant createdAt = Instant.now();
+    private Instant updatedAt = Instant.now();
+    private int version = 1;
+    private List<Product> products = List.of();
 
-    public String getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(int id) {
         this.id = id;
     }
 

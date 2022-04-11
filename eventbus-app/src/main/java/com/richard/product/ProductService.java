@@ -1,10 +1,8 @@
 package com.richard.product;
 
-import com.excalibur.product.Tables;
 import com.excalibur.product.tables.records.ProductRecord;
 import jakarta.inject.Singleton;
 import org.jooq.DSLContext;
-import org.jooq.InsertResultStep;
 
 import java.time.Instant;
 import java.util.List;
@@ -33,9 +31,9 @@ public class ProductService {
         productRecord.setSku("1-e0286");
         productRecord.setDescription("<p>Born in the late '60s and rocked by generations, the Suede is arguably PUMA’s most iconic sneaker. Today, we’re taking its sport-inspired swagger to new heights (literally) with the Suede Platform. A women’s-only silhouette, it boasts a thick platform sole, ridged tooling, and plenty of edge. It’s a gamechanger of a sneaker… for women who are ready to change the game.</p><ul><li>Suede upper with perf detailing at midfoot</li><li>Lace closure for a snug fit</li><li>Platform rubber outsole with ridged tooling at toe</li><li>PUMA Formstrip at lateral and medial sides</li><li>PUMA Suede callout in metallic foil at lateral side</li><li>Woven PUMA Logo Label at tongue</li></ul>");
         productRecord.setSummary("<p>Born in the late '60s and rocked by generations, the Suede is arguably PUMA’s most iconic sneaker. Today, we’re taking its sport-inspired swagger to new heights (literally) with the Suede Platform. A women’s-only silhouette, it boasts a thick platform sole, ridged tooling, and plenty of edge. It’s a gamechanger of a sneaker… for women who are ready to change the game.</p><ul><li>Suede upper with perf detailing at midfoot</li><li>Lace closure for a snug fit</li><li>Platform rubber outsole with ridged tooling at toe</li><li>PUMA Formstrip at lateral and medial sides</li><li>PUMA Suede callout in metallic foil at lateral side</li><li>Woven PUMA Logo Label at tongue</li></ul>");
-        productRecord.setIsActive(true);
+        productRecord.setActive(true);
 
-        productRecord.setCreatedOn(Instant.now().toString());
+        productRecord.setCreatedAt(Instant.now().toString());
         productRecord.setUpdatedAt(Instant.now().toString());
 
 //        int results = dslContext.insertInto(Tables.PRODUCT)
