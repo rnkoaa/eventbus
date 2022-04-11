@@ -7,7 +7,9 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 public record MessageProcessingWorker(EventBus eventBus, BlockingQueue<Message> queue,
-                                      BusConfig busConfig) implements Runnable {
+                                      BusConfig busConfig,
+                                      DeadLetterEventListener deadLetterEventListener) implements Runnable {
+
 
     @Override
     public void run() {
@@ -20,6 +22,9 @@ public record MessageProcessingWorker(EventBus eventBus, BlockingQueue<Message> 
                         return;
                     }
                     List<EventHandlerClassInfo> handlers = eventBus.findHandlers(event.getClass());
+                    if (handlers.size() == 0) {
+                        deadLetterEventListener.onEvent(event);
+                    }
                     System.out.printf("Found %d handlers for event %s%n", handlers.size(), event.getClass());
                     for (EventHandlerClassInfo handler : handlers) {
                         Method method = handler.handlerMethod();
@@ -37,7 +42,7 @@ public record MessageProcessingWorker(EventBus eventBus, BlockingQueue<Message> 
                                             eventHandler.getClass().getName(),
                                             System.identityHashCode(eventHandler)),
                                     e);
-                        }catch (Exception ex){
+                        } catch (Exception ex) {
                             System.out.println(ex.getMessage());
                             ex.printStackTrace();
                         }
@@ -48,5 +53,10 @@ public record MessageProcessingWorker(EventBus eventBus, BlockingQueue<Message> 
             }
 
         }
+    }
+
+    public MessageProcessingWorker withDeadLetterEventListener(DeadLetterEventListener deadLetterEventListener) {
+//        this.deadLetterEventListener = deadLetterEventListener;
+        return new MessageProcessingWorker(eventBus, queue, busConfig, deadLetterEventListener);
     }
 }

@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 public class InMemoryEventBus implements EventBus {
 
+
     record ScheduledQueueMonitor(BlockingQueue<Message> queue) implements Runnable {
 
         @Override
@@ -16,7 +17,7 @@ public class InMemoryEventBus implements EventBus {
         }
     }
 
-    private DeadLetterEventListener deadLetterEventListener;
+    private MessageProcessingWorker messageProcessingWorker;
     private LogListener logListener;
     private static volatile InMemoryEventBus instance;
     private static final Map<Class<?>, List<EventHandlerClassInfo>> handlers = new ConcurrentHashMap<>();
@@ -28,7 +29,8 @@ public class InMemoryEventBus implements EventBus {
         BlockingQueue<Message> queue = new ArrayBlockingQueue<>((int) busConfig.defaultQueueSize());
         this.postingThread = new BackgroundMessagePostingThread(queue);
         executorService = Executors.newCachedThreadPool();
-        executorService.submit(new MessageProcessingWorker(this, queue, busConfig));
+        this.messageProcessingWorker = new MessageProcessingWorker(this, queue, busConfig, null);
+        executorService.submit(messageProcessingWorker);
         Executors.newScheduledThreadPool(1).scheduleAtFixedRate(new ScheduledQueueMonitor(queue), 2, 5, TimeUnit.SECONDS);
     }
 
@@ -37,7 +39,7 @@ public class InMemoryEventBus implements EventBus {
     }
 
     public void registerDeadLetterListener(DeadLetterEventListener deadLetterEventListener) {
-        this.deadLetterEventListener = deadLetterEventListener;
+        this.messageProcessingWorker = this.messageProcessingWorker.withDeadLetterEventListener(deadLetterEventListener);
     }
 
     public static InMemoryEventBus getInstance() {

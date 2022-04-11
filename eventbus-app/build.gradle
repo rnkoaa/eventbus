@@ -2,13 +2,27 @@ plugins {
     id("java")
     id("com.github.johnrengelman.shadow") version "7.1.2"
     id("io.micronaut.application") version "3.3.0"
+    id 'nu.studer.jooq' version '6.0.1'
+    id "org.flywaydb.flyway" version "8.5.7"
 }
 
 version = "0.0.1"
 group = "com.richard.eventbus"
 
 repositories {
+    mavenLocal()
     mavenCentral()
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs += ['src/generated/jooq']
+        }
+    }
+}
+configurations {
+    flywayMigration
 }
 
 dependencies {
@@ -19,6 +33,11 @@ dependencies {
 
     implementation(project(":events"))
 
+    implementation("org.xerial:sqlite-jdbc:$sqliteVersion")
+    implementation("org.flywaydb:flyway-core:$flywayVersion")
+    implementation("org.jooq:jooq:3.16.5")
+    jooqGenerator("org.xerial:sqlite-jdbc:$sqliteVersion")
+    jooqGenerator("org.jooq:jooq-meta-extensions:$jooqVersion")
     annotationProcessor("io.micronaut:micronaut-http-validation")
     implementation("io.micronaut:micronaut-http-client")
     implementation("io.micronaut:micronaut-jackson-databind")
@@ -27,6 +46,7 @@ dependencies {
     runtimeOnly("ch.qos.logback:logback-classic")
     implementation("io.micronaut:micronaut-validation")
 
+    testImplementation("org.assertj:assertj-core:3.22.0")
 }
 
 
@@ -48,6 +68,82 @@ micronaut {
     }
 }
 
+// https://flywaydb.org/documentation/usage/gradle/migrate
+flyway {
+    mixed = true
+    driver = 'org.sqlite.JDBC'
+    url = "jdbc:sqlite:${projectDir}/src/main/resources/db/excalibur.db"
+//    url = "jdbc:sqlite:src/main/resources/db/excalibur.db"
+//    locations = ["classpath:migration"]
+    locations = ["filesystem:src/main/resources/db/migrations"]
+}
+
+jooq {
+    configurations {
+        main {
+            generationTool {
+                logging = org.jooq.meta.jaxb.Logging.INFO
+                generator {
+                    name = 'org.jooq.codegen.DefaultGenerator'
+                    database {
+                        name = 'org.jooq.meta.extensions.ddl.DDLDatabase'
+//                        name = 'org.jooq.meta.sqlite.SQLiteDatabase'
+                        properties {
+                            property {
+                                key = 'scripts'
+                                value = 'src/main/resources/db/migrations/*.sql'
+//                                value = 'build/resources/main/db/migrations/*.sql'
+                            }
+                            property {
+                                key = 'sort'
+                                value = 'flyway'
+                            }
+                            property {
+                                key = 'logExecutedQueries'
+                                value = 'false'
+                            }
+                            property {
+                                key = 'logExecutionResults'
+                                value = 'false'
+                            }
+                        }
+                    }
+
+                    generate {
+                        relations = true
+                        deprecated = false
+                        records = true
+                        javaTimeTypes = true
+                        immutablePojos = true
+                        fluentSetters = true
+                    }
+                    target {
+                        packageName = 'com.excalibur.product'
+                        directory = 'src/generated/jooq'
+                    }
+                    strategy.name = 'org.jooq.codegen.DefaultGeneratorStrategy'
+                }
+            }
+        }
+    }
+}
+
+// configure jOOQ task such that it only executes when something has changed that potentially affects the generated JOOQ sources
+// - the jOOQ configuration has changed (Jdbc, Generator, Strategy, etc.)
+// - the classpath used to execute the jOOQ generation tool has changed (jOOQ library, database driver, strategy classes, etc.)
+// - the schema files from which the schema is generated and which is used by jOOQ to generate the sources have changed (scripts added, modified, etc.)
+//tasks.named('generateJooq').configure {
+//    // ensure database schema has been prepared by Flyway before generating the jOOQ sources
+//    dependsOn tasks.named('flywayMigrate')
+//
+//    // declare Flyway migration scripts as inputs on the jOOQ task
+//    inputs.files(fileTree('src/main/resources/db/migration'))
+//            .withPropertyName('migrations')
+//            .withPathSensitivity(PathSensitivity.RELATIVE)
+//
+//    // make jOOQ task participate in incremental builds (and build caching)
+//    allInputsDeclared = true
+//}
 
 test {
     useJUnitPlatform()

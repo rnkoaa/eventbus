@@ -16,4 +16,5 @@ public class BackgroundMessagePostingThread {
             throw new RuntimeException(e);
         }
     }
+
 }
