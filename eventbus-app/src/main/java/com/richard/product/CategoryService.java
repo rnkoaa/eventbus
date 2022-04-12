@@ -3,17 +3,13 @@ package com.richard.product;
 import com.excalibur.product.tables.records.CategoryRecord;
 import jakarta.inject.Singleton;
 import org.jooq.DSLContext;
-import org.jooq.Record1;
-import org.jooq.Result;
 import org.jooq.exception.DataAccessException;
 
-import java.time.Instant;
-
 import static com.excalibur.product.Tables.CATEGORY;
-import static com.excalibur.product.Tables.PRODUCT;
 
 @Singleton
 public class CategoryService {
+    static String UNIQUE_CONSTRAINT_EXCEPTION = "UNIQUE constraint failed";
 
     private final DSLContext dslContext;
 
@@ -39,11 +35,13 @@ public class CategoryService {
                     category.setId(categoryId);
                 }
             } catch (DataAccessException ex) {
-                try (var res2 = dslContext.selectFrom(CATEGORY)
-                        .where(CATEGORY.NAME.eq(category.getName()))) {
-                    Integer categoryId = res2.fetchOne(CATEGORY.ID);
-                    if (categoryId != null) {
-                        category.setId(categoryId);
+                if (ex.getMessage().contains(UNIQUE_CONSTRAINT_EXCEPTION)) {
+                    try (var res2 = dslContext.selectFrom(CATEGORY)
+                            .where(CATEGORY.NAME.eq(category.getName()))) {
+                        Integer categoryId = res2.fetchOne(CATEGORY.ID);
+                        if (categoryId != null) {
+                            category.setId(categoryId);
+                        }
                     }
                 }
             }

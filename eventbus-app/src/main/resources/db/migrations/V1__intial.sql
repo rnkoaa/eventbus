@@ -31,6 +31,13 @@ CREATE TABLE IF NOT EXISTS  product (
     version INTEGER
 );
 
+
+-- [jooq ignore start]
+  CREATE UNIQUE INDEX IF NOT EXISTS idx_product_sku
+      ON product (sku);
+-- [jooq ignore stop]
+
+
 CREATE TABLE IF NOT EXISTS product_category (
     category_id INTEGER NOT NULL,
     product_id INTEGER NOT NULL,
