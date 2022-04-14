@@ -3,6 +3,7 @@ package com.richard.product;
 
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import jakarta.inject.Inject;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Set;
@@ -38,10 +39,25 @@ class ProductServiceTest {
         category.setName("Shoes");
         category.setActive(true);
         category.setVersion(1);
-        product.setCategories(Set.of(category));
+
+        Category category2 = new Category();
+        category2.setName("Women");
+        category2.setActive(true);
+        category2.setVersion(1);
+
+
+        product.setCategories(Set.of(category, category2));
 
         var productResult = productService.create(product);
         assertThat(productResult.getId()).isGreaterThan(0);
+
+        productService.delete(productResult.getId());
+
+    }
+
+    @AfterEach
+    void cleanup() {
+
     }
 
 }
