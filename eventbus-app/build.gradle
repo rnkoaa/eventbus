@@ -46,7 +46,7 @@ dependencies {
     runtimeOnly("ch.qos.logback:logback-classic")
     implementation("io.micronaut:micronaut-validation")
 
-    testImplementation("org.assertj:assertj-core:3.22.0")
+    testImplementation('org.assertj:assertj-core:3.23.1')
 }
 
 

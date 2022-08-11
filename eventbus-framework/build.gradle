@@ -12,14 +12,12 @@ repositories {
 dependencies {
     implementation(project(":eventbus-annotations"))
     implementation("org.slf4j:slf4j-api:1.7.36")
-//    implementation(project(":eventbus-annotations"))
-//    implementation(project(":eventbus-framework"))
     implementation 'com.squareup:javapoet:1.13.0'
 
     annotationProcessor('com.google.auto.service:auto-service:1.0.1')
     implementation('com.google.auto.service:auto-service:1.0.1')
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.0'
 }
 
 
