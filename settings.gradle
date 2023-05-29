@@ -1,6 +1,6 @@
 rootProject.name = 'eventbus'
 include 'events'
 include 'eventbus-annotations'
-include 'eventbus-app'
+//include 'eventbus-app'
 include 'eventbus-framework'
 

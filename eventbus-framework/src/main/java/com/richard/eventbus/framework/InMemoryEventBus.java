@@ -31,7 +31,8 @@ public class InMemoryEventBus implements EventBus {
         executorService = Executors.newCachedThreadPool();
         this.messageProcessingWorker = new MessageProcessingWorker(this, queue, busConfig, null);
         executorService.submit(messageProcessingWorker);
-        Executors.newScheduledThreadPool(1).scheduleAtFixedRate(new ScheduledQueueMonitor(queue), 2, 5, TimeUnit.SECONDS);
+        Executors.newScheduledThreadPool(1)
+                .scheduleAtFixedRate(new ScheduledQueueMonitor(queue), 2, 5, TimeUnit.SECONDS);
     }
 
     public void registerLogger(LogListener logListener) {

@@ -4,3 +4,5 @@ build/
 !gradle/wrapper/gradle-wrapper.jar
 *.db
 **/src/generated/
+.idea
+gradlew.bat

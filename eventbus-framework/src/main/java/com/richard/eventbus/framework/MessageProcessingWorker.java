@@ -29,6 +29,9 @@ public record MessageProcessingWorker(EventBus eventBus, BlockingQueue<Message> 
                     for (EventHandlerClassInfo handler : handlers) {
                         Method method = handler.handlerMethod();
                         Object eventHandler = handler.eventListenerInstance();
+                        if(eventHandler == null){
+                            continue;
+                        }
                         try {
                             method.invoke(eventHandler, event);
                         } catch (IllegalAccessException | InvocationTargetException e) {
